@@ -3,7 +3,7 @@
 my_packages = c("sf", "sfdep", "spdep", "dplyr", "tidyr", "ggplot2", "rgdal", "terra")
 
 install_if_missing = function(p) {
-  if (p %notin% rownames(installed.packages())) {
+  if (p !%in% rownames(installed.packages())) {
     install.packages(p)
   }
 }
