@@ -1,12 +1,12 @@
 library(shiny)
-library(ggplot2)
-#library(sf)
+library(sf)
 library(sfdep)
 library(spdep)
 library(dplyr)
 library(tidyr)
-library(rgdal)
-library(terra)
+library(ggplot2)
+
+
 server <- function(input, output) {
   
   
