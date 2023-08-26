@@ -1,6 +1,6 @@
 #init.R
 
-my_packages <- c("shiny", "sf", "sfdep", "spdep", "dplyr", "tidyr", "ggplot2", "rgdal", "terra")
+my_packages <- c("sf", "sfdep", "spdep", "dplyr", "tidyr", "ggplot2", "rgdal", "terra")
 
 install_if_missing = function(p) {
   if p %in% rownames(installed.packages()) == FALSE {
