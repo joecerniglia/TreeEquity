@@ -3,8 +3,8 @@ server <- function(input, output) {
   
   output$geo <- renderPlot({
     print(input$clustermap)
-    setwd(
-      "/Users/josephcerniglia/Documents/eCornell Data Analytics in R/Hotspots")
+    #setwd(
+    #  "/Users/josephcerniglia/Documents/eCornell Data Analytics in R/Hotspots")
     
     filestring <- tolower(input$select)
     tes_data <-  read.csv(paste0(filestring,"_tes.csv"))
