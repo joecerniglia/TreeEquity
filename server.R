@@ -150,7 +150,7 @@ output$hist <- renderPlot({
       tes_data <-  read.csv(paste0(filestring,"_tes.csv"))$tesctyscor
       #define histogram break points
       #hist_breaks <- hist(tes_data)$breaks
-      hist_breaks <- 30
+      hist_breaks <- 25
       #define colors to use in histogram based on break points
       #color_list <- rep('darkgreen', length(hist_breaks))
       #color_list[hist_breaks < 85] <- 'green'
