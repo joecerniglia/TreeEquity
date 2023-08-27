@@ -8,7 +8,7 @@ library(tidyr)
 
 
 server <- function(input, output) {
-output$geo <- renderPlot({
+##output$geo <- renderPlot({
     ##print(input$clustermap)
     ##setwd(
     ##  "/Users/josephcerniglia/Documents/eCornell Data Analytics in R/Hotspots")
