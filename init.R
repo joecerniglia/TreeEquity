@@ -1,6 +1,6 @@
 #init.R
 
-my_packages = c("rgdal", "sf", "sfdep", "spdep", "dplyr", "tidyr", "ggplot2")
+my_packages = c("dplyr", "tidyr")
 
 install_if_missing = function(p) {
   if (p %in% rownames(installed.packages())) {
