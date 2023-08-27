@@ -1,6 +1,6 @@
 #init.R
 
-my_packages = c("dplyr", "tidyr")
+my_packages = c("dplyr", "tidyr","terra")
 
 install_if_missing = function(p) {
   if (p %in% rownames(installed.packages())) {
