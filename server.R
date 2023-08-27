@@ -8,6 +8,9 @@ library(tidyr)
 
 
 server <- function(input, output) {
+
+#define histogram break points
+hist_breaks <- hist(read.csv(paste0(filestring,"_tes.csv"))$tesctyscor)$breaks
   
 color_list <- rep('darkgreen', length(hist_breaks))
 color_list[hist_breaks < 80] <- 'green'
