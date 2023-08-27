@@ -19,8 +19,8 @@ output$hist <- renderPlot({
       hist_breaks <- hist(tes_data)$breaks
       #define colors to use in histogram based on break points
       color_list <- rep('darkgreen', length(hist_breaks))
-      color_list[hist_breaks < 80] <- 'green'
-      color_list[hist_breaks < 60] <- 'brown'
+      color_list[hist_breaks < 85] <- 'green'
+      color_list[hist_breaks < 70] <- 'brown'
       hist(tes_data, breaks="Sturges", main=paste0("Distribution of tree equity scores for ",input$select),
       xlab="Tree Equity Score [range 0-100]",col=color_list)}
     )}
