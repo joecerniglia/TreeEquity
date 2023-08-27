@@ -15,7 +15,7 @@ server <- function(input, output) {
 output$hist <- renderPlot({
       filestring <- tolower(input$select)
       tes_data <-  read.csv(paste0(filestring,"_tes.csv"))$tesctyscor
-      hist(tes_data)
+      hist(tes_data,color="darkgreen")
     })
       
 
