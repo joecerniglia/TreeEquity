@@ -7,7 +7,7 @@ ui <- fluidPage(
                               label = "Select a state to see a Tree Map", 
                               choices = sort(c("AK","AL","CT","FL","MA","VT",
                                                "OR","CA","NY",
-                                               "MS","ME","TX" ))),width=4
+                                               "MS","ME","TX","CO" ))),width=4
    #              , 
    #         checkboxInput("clustermap", "cluster map", TRUE),
   #          verbatimTextOutput("value")
