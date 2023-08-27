@@ -155,9 +155,11 @@ output$hist <- renderPlot({
       #color_list <- rep('darkgreen', length(hist_breaks))
       #color_list[hist_breaks < 85] <- 'green'
       #color_list[hist_breaks < 70] <- 'brown'
+    highestCount <- max(xhist$counts, yhist$counts)
+      highestCount <- max(hist(tes_data)$counts)
       hist(tes_data, breaks=hist_breaks, main=paste0("Distribution of tree equity scores for ",input$select),
       xlab="Tree Equity Score [range 0-100]",col="darkgreen",
-       ylim=c(0,max(tes_data)),cex.lab=1.5, cex.axis=1.2, font.main=1.5, cex.main=1.8)})
+       ylim=c(0,highestCount),cex.lab=1.5, cex.axis=1.2, font.main=1.5, cex.main=1.8)})
     }
 
         
