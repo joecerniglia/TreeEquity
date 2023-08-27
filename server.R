@@ -15,8 +15,14 @@ server <- function(input, output) {
 output$hist <- renderPlot({
       filestring <- tolower(input$select)
       tes_data <-  read.csv(paste0(filestring,"_tes.csv"))$tesctyscor
+      #define histogram break points
+      hist_breaks <- hist(tes_data)$breaks
+      #define colors to use in histogram based on break points
+      color_list <- rep('darkgreen', length(hist_breaks))
+      color_list[hist_breaks < 80] <- 'green'
+      color_list[hist_breaks < 60] <- 'brown'
       hist(tes_data, breaks="Sturges", main=paste0("Distribution of tree equity scores for ",input$select),
-      xlab="Tree Equity Score [range 0-100]",col="darkgreen")}
+      xlab="Tree Equity Score [range 0-100]",col=color_list)}
     )}
 
 
