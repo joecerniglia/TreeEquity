@@ -157,7 +157,7 @@ output$hist <- renderPlot({
       #color_list[hist_breaks < 70] <- 'brown'
       hist(tes_data, breaks=hist_breaks, main=paste0("Distribution of tree equity scores for ",input$select),
       xlab="Tree Equity Score [range 0-100]",col="darkgreen",
-       cex.axis=0.5, font.main=1, cex.main=0.8)})
+       cex.axis=1.5, font.main=1.5, cex.main=1.8)})
     }
 
         
