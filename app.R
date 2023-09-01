@@ -124,6 +124,22 @@ server <- function(input, output) {
   	 else 
   	 {Gradi1<-"#5C2C26" 
     	Gradi2<-"#90EE90"}
+  	 #if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+  	 #																																						"#86CEFA","#73B9EE", "#5494DA","#3373C4","#1750AC")}
+  	 
+  	 if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+  	 																																					 "#5494DA","#3373C4","#1750AC")}
+  	 #else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+  	 #															"#11C411","#0B820B")}
+  	 
+  	 #else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+  	 #	 													"#93F593", "#51EF51","#11C411","#0B820B","#086208")}
+  	 
+  	 else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+  	 														 "#11C411","#0B820B","#086208")}
+  	 
+  	
+  	
   	 n<-7
   	 progress$inc(1/n, detail = paste("Reading in data: step", 1))
     filestring <- tolower(input$select)
@@ -282,11 +298,12 @@ server <- function(input, output) {
     else {ggplot(tes_data) +
         geom_sf(aes(geometry=geometry,fill = tesctyscor), color = "black", 
                 lwd = boundary_factor) +
-       
-      scale_fill_gradient(
-          name = "Tree Equity Score",
-                            low =  Gradi1,
-                            high = Gradi2) +
+    		scale_fill_gradientn(colors = Gradi,
+    																							name = "Tree Equity Score") + 
+      #scale_fill_gradient(
+      #    name = "Tree Equity Score",
+      #                      low =  Gradi1,
+      #                      high = Gradi2) +
        
         theme(
           plot.title = element_text(hjust = 0.5),
