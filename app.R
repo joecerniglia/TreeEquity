@@ -9,6 +9,8 @@ library(rgdal)
 library(terra)
 library(shinydashboard)
 library(shinythemes)
+library(shiny.fluent)
+library(shinyjs)
 
 options(scipen=999)
 abbrev<-c("AK", "AL", "AR", "AZ", "CA", 
@@ -38,13 +40,32 @@ states<-c("Alaska", "Alabama", "Arkansas", "Arizona",
 state_lookup <- cbind(abbrev,states)
 
 ui <- fluidPage(
+  useShinyjs(),
   titlePanel("Tree Equity in the United States"),
-  
+  tags$style("
+      .checkbox { /* checkbox is a div class*/
+        line-height: 8px;
+        margin-bottom: 20px; /*set the margin, so boxes don't overlap*/
+      }
+      input[type='checkbox']{ /* style for checkboxes */
+        width: 12px; /*Desired width*/
+        height: 12px; /*Desired height*/
+        line-height: 18px; 
+      }
+      span { 
+          margin-left: 0px;  /*set the margin, so boxes don't overlap labels*/
+          line-height: 15px; 
+      }
+  "),
 
   sidebarLayout(
     
-    sidebarPanel(selectInput( inputId = "select", 
-                              label = "Select a state to see a tree map:", 
+    sidebarPanel(checkboxInput("specialstates", "Limit states to those with 
+    																											most complete data.", FALSE),
+    													verbatimTextOutput("value3"),
+    													uiOutput("specialStates"),
+    												selectInput( inputId = "select", 
+                              label = "Select a state:", 
                               choices = list('Alabama' = 'AL',
                                             'Alaska'='AK','Arizona'='AZ',
                                              'Arkansas'='AR',
@@ -62,13 +83,25 @@ ui <- fluidPage(
 'Pennsylvania'='PA','Rhode Island'='RI','South Carolina'='SC',
 'South Dakota'='SD','Tennessee'='TN','Texas'='TX','Utah'='UT','Vermont'='VT',
 'Virginia'='VA',
-'Washington'='WA','West Virginia'='WV','Wisconsin'='WI','Wyoming'='WY')), 
-                 width="2", 
+'Washington'='WA','West Virginia'='WV','Wisconsin'='WI','Wyoming'='WY'))
+
+
+, 
+            width=2,
             checkboxInput("clustermap", "Cluster Map", FALSE),
             verbatimTextOutput("value"),
-            checkboxInput("colorblind", "Color Enhancement (for better contrast or to assist the color-blind)", FALSE),
-            verbatimTextOutput("value2")),
+            #tags$br(),
+            p(id = "element", "Adjust green threshold:"),
     
+												SpinButton.shinyInput("spin", value = 0, min = -3, max = 3, 
+																																		step = 1, label="",
+																																		textOutput(outputId = "spin")),
+												tags$br(),
+            checkboxInput("colorblind", 
+            "Color Enhancement (for better contrast or to assist 
+            the color-blind)", FALSE),
+            verbatimTextOutput("value2")),
+
     mainPanel(
       fluidPage(
         column(width = 7,
@@ -93,16 +126,57 @@ tags$footer(
     "https://rpubs.com/heatherleeleary/hotspot_getisOrd_tut.",
     target = "_blank",
     href = "https://rpubs.com/heatherleeleary/hotspot_getisOrd_tut"),
-    style = "position:absolute;bottom:0; width: 100%; color: black; text-align: center;"
-)))))  
+    style = "position:absolute;bottom:0;width:100%;color:black;text-align:center;"
+)))))
 
 
 
-server <- function(input, output) {
-  
-  
+server <- function(input, output, session) {
+ observe({
+ 	if (input$specialstates==TRUE){updateSelectInput(session = session,
+ 																																																		inputId = "select",
+ 																										choices = list('Connecticut'='CT','Delaware'='DE',
+ 																																					'Florida'='FL','Massachusetts'='MA',
+ 																																					 'New Jersey'='NJ', 'Rhode Island'='RI'))
+ 	}
+ 	else
+ 	{updateSelectInput(session = session,
+ 																				inputId = "select",
+ 																				choices = list('Alabama' = 'AL',
+ 													'Alaska'='AK','Arizona'='AZ',
+ 														'Arkansas'='AR',
+ 							'California'='CA','Colorado'='CO','Connecticut'='CT','Delaware'='DE',
+ 							'District of Columbia'='DC','Florida'='FL','Georgia'='GA','Hawaii'='HI',
+ 							'Idaho'='ID','Illinois'='IL','Indiana'='IN','Iowa'='IA','Kansas'='KS',
+ 							'Kentucky'='KY','Louisiana'='LA','Maine'='ME',
+ 							'Maryland'='MD','Massachusetts'='MA',
+ 							'Michigan'='MI','Minnesota'='MN','Mississippi'='MS','Missouri'='MS',
+ 							'Montana'='MT','Nebraska'='NE','Nevada'='NV','New Hampshire'='NH',
+ 							'New Jersey'='NJ', 'New Mexico'='NM',
+ 							'New York'='NY',
+ 							'North Carolina'='NC','North Dakota'='ND',
+ 							'Ohio'='OH','Oklahoma'='OK','Oregon'='OR',
+ 							'Pennsylvania'='PA','Rhode Island'='RI','South Carolina'='SC',
+ 							'South Dakota'='SD','Tennessee'='TN','Texas'='TX','Utah'='UT',
+ 							'Vermont'='VT',
+ 							'Virginia'='VA',
+ 			   'Washington'='WA','West Virginia'='WV','Wisconsin'='WI','Wyoming'='WY'))}
+ 	
+ }) 
+ 
+	observe({
+		if(input$clustermap==FALSE)
+		 {shinyjs::show("spin")
+			html("element", "Adjust green threshold:")
+			}
+		else
+		{
+			html("element", "")
+			shinyjs::hide("spin")
+		}
+	})
+	 
   output$geo <- renderPlot({
-    print(input$clustermap)
   	 # Create a Progress object
    	progress <- shiny::Progress$new()
   	 # Make sure it closes when we exit this reactive, even if there's an error
@@ -110,7 +184,7 @@ server <- function(input, output) {
   	 progress$set(message = "Building tree equity map...", value = 0)
     #comment out the set working directory function to deploy to shinyapps.io
     #setwd(
-    # "/Users/josephcerniglia/Documents/eCornell Data Analytics in R/Hotspots/App-4")
+    #"/Users/josephcerniglia/Documents/eCornell Data Analytics in R/Hotspots/App-4")
     #green red palette is #8
     #Palette #7 will turn the green to blue for a greater
     #accessibility to the color-blind.
@@ -124,22 +198,69 @@ server <- function(input, output) {
   	 else 
   	 {Gradi1<-"#5C2C26" 
     	Gradi2<-"#90EE90"}
-  	 #if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
-  	 #																																						"#86CEFA","#73B9EE", "#5494DA","#3373C4","#1750AC")}
+  	 #print(input$spin)
+  	 #print(input$colorblind)
+  	 req(input$spin)
+  
+  if (input$spin==-3) {
+  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34",
+  	 																																							"#6ED3F6","#8FDDF8","#2abff3",
+  	 																																							"#0DB3EC","#0B99CA", "#097FA9",
+  	 																																							"#076687","#1750AC")}
+  	 	else {Gradi<-c("#9F1D34",
+  	 																"#93F593","#72F272","#51EF51","#14E514","#11C411","#0EA30B",
+  	 																"#0B820B","#086208")}
+  	 }	
+  else if (input$spin==-2) {
+  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+  	 																																							"#8FDDF8","#2abff3","#0DB3EC",
+  	 																																							"#0B99CA", "#097FA9","#076687",
+  	 																																							"#1750AC")}
+  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F",
+  	 																"#93F593", "#51EF51","#14E514","#11C411","#0EA30B",
+  	 																"#0B820B","#086208")}
+  	 }	 
+  else if (input$spin==-1) {
+  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+  	 																																							"#FCCCA5",
+  	 																																							"#8FDDF8","#0DB3EC","#0B99CA", 
+  	 																																							"#097FA9","#076687","#1750AC")}
+  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5",
+  	 																"#93F593", "#51EF51","#11C411","#0EA30B","#0B820B",
+  	 																"#086208")}
+  	 }
+  	 else if (input$spin==0) {
+  	 					if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+  	 																																											"#FCCCA5","#FCE2B6",
+  	 																																						"#8FDDF8","#0DB3EC", "#097FA9",
+  	 																																						"#076687","#1750AC")}
+  	 	    else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+  	 																"#93F593", "#51EF51","#11C411","#0B820B","#086208")}
+  	 }
+  	 else if (input$spin==1) {
   	 
-  	 if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
-  	 																																					 "#5494DA","#3373C4","#1750AC")}
-  	 #else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
-  	 #															"#11C411","#0B820B")}
-  	 
-  	 #else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
-  	 #	 													"#93F593", "#51EF51","#11C411","#0B820B","#086208")}
-  	 
-  	 else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
-  	 														 "#11C411","#0B820B","#086208")}
-  	 
-  	
-  	
+				  	 if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+				  	 																																						"#FCCCA5","#FCE2B6",
+				  	 																																					 "#5494DA","#3373C4","#1750AC")}
+				  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+				  	 																"#11C411","#0B820B","#086208")}
+  	 }
+  	 else if (input$spin==2) {
+  	 	   if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+  	 	   																																						"#FCCCA5","#FCE2B6",
+  	 																																																															"#3373C4",
+  	 	   																																						"#1750AC")}
+  	 	  else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+  	 																  "#0B820B","#086208")}
+  	 }
+  	 else if (input$spin==3) {
+  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+  	 																																							"#FCCCA5","#FCE2B6",
+  	 																																							"#1750AC")}
+  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+  	 																"#086208")}
+  	 }
+
   	 n<-7
   	 progress$inc(1/n, detail = paste("Reading in data: step", 1))
     filestring <- tolower(input$select)
@@ -153,9 +274,11 @@ server <- function(input, output) {
     tes_data <- tes_data[!is.na(tes_data$tesctyscor),]
     
     if (input$clustermap==TRUE) {
+    			
 				    #if (input$select=='CA') {tes_data <- sample_n(tes_data,10000)}
 				    # Create a neighbor list based on queen contiguity
-				    progress$inc(1/n, detail = paste("Removing polygons with empty neighbor sets from the data: step", 2))
+				    progress$inc(1/n, detail = paste("Removing polygons with empty neighbor 
+				    																																	sets from the data: step", 2))
 				    list_nb <- poly2nb(tes_data$geometry, queen = TRUE)
 				    # Check for empty neighbor sets
 				    # card() calculates number of neighbors for each polygon in the list
@@ -174,7 +297,8 @@ server <- function(input, output) {
     
     
 				    # Now that we removed empty neighbor sets, (tes_subset).
-				    # once again identify neighbors with queen contiguity (edge/vertex touching)
+				    # once again identify neighbors with queen contiguity (edge/vertex 
+				    #touching)
 				    #View(tes_subset)
 				    tes_nb <- poly2nb(tes_subset$geometry, queen=TRUE)
 				    #View(tes_nb)
@@ -187,11 +311,11 @@ server <- function(input, output) {
 				    tes_lag <- lag.listw(tes_w_binary, tes_subset$tesctyscor)
 				    progress$inc(1/n, detail = paste("Calculating global p value: step", 3))
 				    #globalG.test (or global_g_test()) computes a global test for spatial 
-				    #autocorrelation using a Monte Carlo simulation approach (simulated spatial 
-				    #datasets that have the same spatial structure as the original data but 
-				    #are randomly permuted). It tests the null hypothesis of no spatial 
-				    #autocorrelation against the alternative hypothesis of positive spatial 
-				    #autocorrelation.
+				    #autocorrelation using a Monte Carlo simulation approach (simulated 
+				    #spatial datasets that have the same spatial structure as the original 
+				    #data but are randomly permuted). It tests the null hypothesis of no 
+				    #spatial autocorrelation against the alternative hypothesis of positive 
+				    #spatial autocorrelation.
 				    #The output includes a p-value.  Is it significant?
 				    p_value <- globalG.test(tes_subset$tesctyscor, tes_w_binary)$p[1,]
 				    p2 <- if(p_value<=.001 & input$select != "DC")
@@ -203,7 +327,8 @@ server <- function(input, output) {
     
 
     				progress$inc(1/n, detail = paste(
-    				"Calculating spatial lag, a weighted average of the neighboring tree equity scores: step", 4))
+    				"Calculating spatial lag, a weighted average of the neighboring tree 
+    				#equity scores: step", 4))
     				
     				
         #Identify neighbors, create weights, calculate spatial lag.
@@ -220,9 +345,9 @@ server <- function(input, output) {
         
      
         # Increment the progress bar, and update the detail text.
-      
         progress$inc(1/n, detail = paste(
-        	"Calculating Gi, indicating cluster strength, and local p's with a Monte Carlo simulation: step", 5))
+        	"Calculating Gi, indicating cluster strength, and local p's with a 
+        	#Monte Carlo simulation: step", 5))
         
         # Calculate the Gi using local_g_perm, as tes_hot_spots.
         #The Gi is the ratio of the spatial lag of a feature to the sum of the 
@@ -267,7 +392,6 @@ server <- function(input, output) {
                 )
               ) |> 
               # Visualize the results with ggplot2
-              #Pale<-7
               ggplot(aes(fill = classification)) +
               geom_sf(aes(geometry=geometry),color = "black", 
                       lwd = boundary_factor) +
@@ -295,11 +419,19 @@ server <- function(input, output) {
                               states[which(state_lookup == input$select)],
                               "\n",p2))
             }
-    else {ggplot(tes_data) +
-        geom_sf(aes(geometry=geometry,fill = tesctyscor), color = "black", 
+    
+    
+    
+    else {
+    
+      
+    	 ggplot(tes_data) +
+      geom_sf(aes(geometry=geometry,fill = tesctyscor), color = "black", 
                 lwd = boundary_factor) +
+    	 
     		scale_fill_gradientn(colors = Gradi,
     																							name = "Tree Equity Score") + 
+    		
       #scale_fill_gradient(
       #    name = "Tree Equity Score",
       #                      low =  Gradi1,
