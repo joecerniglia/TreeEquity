@@ -21,9 +21,9 @@ abbrev<-c("AK", "AL", "AR", "AZ", "CA",
           "MS", "MT", "NC", "ND", "NE", 
           "NH", "NJ", "NM", "NV", "NY", 
           "OH", "OK", "OR", "PA", "RI", 
-          "SC", "SD", "TN", "TX", "UT", 
-          "VA", "VT", "WA", "WI", "WV", 
-          "WY")
+          "SC", "SD", "TN", "TX", "TU",
+										"UT", "VA", "VT", "WA", "WI", 
+										"WV", "WY")
 states<-c("Alaska", "Alabama", "Arkansas", "Arizona",  
           "California", "Colorado", "Connecticut", "District of Columbia",
           "Delaware", "Florida", "Georgia", 
@@ -34,10 +34,32 @@ states<-c("Alaska", "Alabama", "Arkansas", "Arizona",
           "Nebraska", "New Hampshire", "New Jersey", "New Mexico", "Nevada", 
           "New York", "Ohio", "Oklahoma", "Oregon",   
           "Pennsylvania", "Rhode Island", 
-          "South Carolina", "South Dakota", "Tennessee", "Texas", 
+          "South Carolina", "South Dakota", "Tennessee", 
+										"Texas", "Tucson, Arizona", 
           "Utah", "Virginia",
           "Vermont",  "Washington", "Wisconsin","West Virginia", "Wyoming")
 state_lookup <- cbind(abbrev,states)
+
+longlist <- list('Alabama' = 'AL','Alaska'='AK','Arizona'='AZ',
+																	'Arkansas'='AR','California'='CA','Colorado'='CO',
+																	'Connecticut'='CT','Delaware'='DE',
+																	'District of Columbia'='DC','Florida'='FL','Georgia'='GA',
+																	'Hawaii'='HI','Idaho'='ID','Illinois'='IL','Indiana'='IN',
+																	'Iowa'='IA','Kansas'='KS','Kentucky'='KY','Louisiana'='LA',
+																	'Maine'='ME','Maryland'='MD','Massachusetts'='MA',
+																	'Michigan'='MI','Minnesota'='MN','Mississippi'='MS',
+																	'Missouri'='MS','Montana'='MT','Nebraska'='NE','Nevada'='NV',
+																	'New Hampshire'='NH','New Jersey'='NJ', 'New Mexico'='NM',
+																	'New York'='NY','North Carolina'='NC','North Dakota'='ND',
+																	'Ohio'='OH','Oklahoma'='OK','Oregon'='OR',
+																	'Pennsylvania'='PA','Rhode Island'='RI','South Carolina'='SC',
+																	'South Dakota'='SD','Tennessee'='TN', 'Texas'='TX', 
+																	'Tucson, Arizona'='TU','Utah'='UT','Vermont'='VT',
+																	'Virginia'='VA','Washington'='WA','West Virginia'='WV',
+																	'Wisconsin'='WI','Wyoming'='WY')
+shortlist <- list('Connecticut'='CT','Delaware'='DE','Florida'='FL',
+																		'Massachusetts'='MA','New Jersey'='NJ', 'Rhode Island'='RI',
+																		'Tucson, Arizona'='TU')
 
 ui <- fluidPage(
   useShinyjs(),
@@ -62,41 +84,21 @@ ui <- fluidPage(
     
     sidebarPanel(checkboxInput("specialstates", "Limit states to those with 
     																											most complete data.", FALSE),
-    	verbatimTextOutput("value3"),
-    		uiOutput("specialStates"),
-    		selectInput( inputId = "select", 
-                              label = "Select a state:", 
-                              choices = list('Alabama' = 'AL',
-                                            'Alaska'='AK','Arizona'='AZ',
-                                             'Arkansas'='AR',
-'California'='CA','Colorado'='CO','Connecticut'='CT','Delaware'='DE',
-'District of Columbia'='DC','Florida'='FL','Georgia'='GA','Hawaii'='HI',
-'Idaho'='ID','Illinois'='IL','Indiana'='IN','Iowa'='IA','Kansas'='KS',
-'Kentucky'='KY','Louisiana'='LA','Maine'='ME',
-'Maryland'='MD','Massachusetts'='MA',
-'Michigan'='MI','Minnesota'='MN','Mississippi'='MS','Missouri'='MS',
-'Montana'='MT','Nebraska'='NE','Nevada'='NV','New Hampshire'='NH',
-'New Jersey'='NJ', 'New Mexico'='NM',
-'New York'='NY',
-'North Carolina'='NC','North Dakota'='ND',
-'Ohio'='OH','Oklahoma'='OK','Oregon'='OR',
-'Pennsylvania'='PA','Rhode Island'='RI','South Carolina'='SC',
-'South Dakota'='SD','Tennessee'='TN','Texas'='TX','Utah'='UT','Vermont'='VT',
-'Virginia'='VA',
-'Washington'='WA','West Virginia'='WV','Wisconsin'='WI','Wyoming'='WY'))
-
-
-, 
+    													verbatimTextOutput("value3"),
+    													uiOutput("specialStates"),
+    												selectInput( inputId = "select", 
+                              label = "Select a state or city:", 
+                              choices = longlist),
             width=2,
             checkboxInput("clustermap", "Cluster Map", FALSE),
             verbatimTextOutput("value"),
             #tags$br(),
             p(id = "element", "Adjust green threshold:"),
     
-	SpinButton.shinyInput("spin", value = 0, min = -3, max = 3, 
+												SpinButton.shinyInput("spin", value = 0, min = -3, max = 3, 
 																																		step = 1, label="",
 																																		textOutput(outputId = "spin")),
-	tags$br(),
+												tags$br(),
             checkboxInput("colorblind", 
             "Color Enhancement (for better contrast or to assist 
             the color-blind)", FALSE),
@@ -126,7 +128,8 @@ tags$footer(
     "https://rpubs.com/heatherleeleary/hotspot_getisOrd_tut.",
     target = "_blank",
     href = "https://rpubs.com/heatherleeleary/hotspot_getisOrd_tut"),
-    style = "position:absolute;bottom:0;width:100%;color:black;text-align:center;"
+    style = "position:absolute;bottom:0;width:100%;color:black;
+     text-align:center;"
 )))))
 
 
@@ -135,32 +138,12 @@ server <- function(input, output, session) {
  observe({
  	if (input$specialstates==TRUE){updateSelectInput(session = session,
  																																																		inputId = "select",
- 																										choices = list('Connecticut'='CT','Delaware'='DE',
- 																																					'Florida'='FL','Massachusetts'='MA',
- 																																					 'New Jersey'='NJ', 'Rhode Island'='RI'))
+ 																										choices = shortlist)
  	}
  	else
  	{updateSelectInput(session = session,
  																				inputId = "select",
- 																				choices = list('Alabama' = 'AL',
- 	'Alaska'='AK','Arizona'='AZ',
- 			'Arkansas'='AR',
- 	'California'='CA','Colorado'='CO','Connecticut'='CT','Delaware'='DE',
-'District of Columbia'='DC','Florida'='FL','Georgia'='GA','Hawaii'='HI',
- 'Idaho'='ID','Illinois'='IL','Indiana'='IN','Iowa'='IA','Kansas'='KS',
- 'Kentucky'='KY','Louisiana'='LA','Maine'='ME',
- 'Maryland'='MD','Massachusetts'='MA',
-'Michigan'='MI','Minnesota'='MN','Mississippi'='MS','Missouri'='MS',
-'Montana'='MT','Nebraska'='NE','Nevada'='NV','New Hampshire'='NH',
- 'New Jersey'='NJ', 'New Mexico'='NM',
-'New York'='NY',
- 'North Carolina'='NC','North Dakota'='ND',
-'Ohio'='OH','Oklahoma'='OK','Oregon'='OR',
-'Pennsylvania'='PA','Rhode Island'='RI','South Carolina'='SC',
- 'South Dakota'='SD','Tennessee'='TN','Texas'='TX','Utah'='UT',
- 'Vermont'='VT',
- 'Virginia'='VA',
- 'Washington'='WA','West Virginia'='WV','Wisconsin'='WI','Wyoming'='WY'))}
+ 																				choices = longlist)}
  	
  }) 
  
@@ -185,10 +168,10 @@ server <- function(input, output, session) {
     #comment out the set working directory function to deploy to shinyapps.io
     #setwd(
     #"/Users/josephcerniglia/Documents/eCornell Data Analytics in R/Hotspots/App-4")
-    #green red palette is #8
-    #Palette #7 will turn the green to blue for a greater
+    #equitable red palette is #8
+    #Palette #7 will turn the equitable to blue for a greater
     #accessibility to the color-blind.
-  	 #90EE90=light green ;  #013220=dark green. #0000FF=dark blue
+  	 #90EE90=light equitable ;  #013220=dark equitable. #0000FF=dark blue
   	 #800000=maroon #B66B3E=tan #8E4B32=chestnut #ADD8E6=light blue (cyan)
   	 #print("#3D0C02") #=dark bean
   	 #F5F5F5=light grey ;  ##57504d=dark grey
@@ -202,75 +185,75 @@ server <- function(input, output, session) {
   	 #print(input$colorblind)
   	 req(input$spin)
   
-  if (input$spin==-3) {
-  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34",
-  	 																																							"#6ED3F6","#8FDDF8","#2abff3",
-  	 																																							"#0DB3EC","#0B99CA", "#097FA9",
-  	 																																							"#076687","#1750AC")}
-  	 	else {Gradi<-c("#9F1D34",
-  	 																"#93F593","#72F272","#51EF51","#14E514","#11C411","#0EA30B",
-  	 																"#0B820B","#086208")}
-  	 }	
-  else if (input$spin==-2) {
-  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
-  	 																																							"#8FDDF8","#2abff3","#0DB3EC",
-  	 																																							"#0B99CA", "#097FA9","#076687",
-  	 																																							"#1750AC")}
-  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F",
-  	 																"#93F593", "#51EF51","#14E514","#11C411","#0EA30B",
-  	 																"#0B820B","#086208")}
-  	 }	 
-  else if (input$spin==-1) {
-  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
-  	 																																							"#FCCCA5",
-  	 																																							"#8FDDF8","#0DB3EC","#0B99CA", 
-  	 																																							"#097FA9","#076687","#1750AC")}
-  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5",
-  	 																"#93F593", "#51EF51","#11C411","#0EA30B","#0B820B",
-  	 																"#086208")}
-  	 }
-  	 else if (input$spin==0) {
-  	 					if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
-  	 																																											"#FCCCA5","#FCE2B6",
-  	 																																						"#8FDDF8","#0DB3EC", "#097FA9",
-  	 																																						"#076687","#1750AC")}
-  	 	    else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
-  	 																"#93F593", "#51EF51","#11C411","#0B820B","#086208")}
-  	 }
-  	 else if (input$spin==1) {
-  	 
-				  	 if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
-				  	 																																						"#FCCCA5","#FCE2B6",
-				  	 																																					 "#5494DA","#3373C4","#1750AC")}
-				  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
-				  	 																"#11C411","#0B820B","#086208")}
-  	 }
-  	 else if (input$spin==2) {
-  	 	   if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
-  	 	   																																						"#FCCCA5","#FCE2B6",
-  	 																																																															"#3373C4",
-  	 	   																																						"#1750AC")}
-  	 	  else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
-  	 																  "#0B820B","#086208")}
-  	 }
-  	 else if (input$spin==3) {
-  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
-  	 																																							"#FCCCA5","#FCE2B6",
-  	 																																							"#1750AC")}
-  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
-  	 																"#086208")}
-  	 }
+			  if (input$spin==-3) {
+			  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34",
+			  	 														"#E3EEEF","#8FDDF8","#6ED3F6","#2abff3","#0DB3EC","#097FA9",
+			  	 																																							"#076687","#1750AC")}
+			  	 	else {Gradi<-c("#9F1D34",
+			  	 																"#93F593","#72F272","#51EF51","#14E514","#11C411","#0EA30B",
+			  	 																"#0B820B","#086208")}
+			  	 }	
+			  else if (input$spin==-2) {
+			  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+			  	 																"#E3EEEF",	"#8FDDF8","#2abff3","#0B99CA","#0DB3EC","#076687",
+			  	 																																							"#1750AC")}
+			  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F",
+			  	 																"#93F593", "#51EF51","#14E514","#11C411","#0EA30B",
+			  	 																"#0B820B","#086208")}
+			  	 }	 
+			  else if (input$spin==-1) {
+			  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+			  	 																																							"#FCCCA5",
+			  	 																																							"#E3EEEF",	"#8FDDF8","#0B99CA", 
+			  	 																																							"#0DB3EC",
+			  	 																																						 "#076687","#1750AC")}
+			  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5",
+			  	 																"#93F593", "#51EF51","#11C411","#0EA30B","#0B820B",
+			  	 																"#086208")}
+			  	 }
+			 else if (input$spin==0) {
+			  	 					if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+			  	 																																											"#FCCCA5","#FCE2B6",
+			  	 																							"#E3EEEF","#8FDDF8","#0DB3EC", "#097FA9","#1750AC")}
+			  	 	    
+			  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+			  	 																"#93F593", "#51EF51","#11C411","#0B820B","#086208")}
+			  	 }
+			 else if (input$spin==1) {
+			  	 
+							  	 if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+							  	 																																						"#FCCCA5","#FCE2B6",
+							  	 																																					 "#8FDDF8","#097FA9","#1750AC")}
+							  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+							  	 																"#11C411","#0B820B","#086208")}
+			  	 }
+			 else if (input$spin==2) {
+			  	 	   if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+			  	 	   																																						"#FCCCA5","#FCE2B6",
+			  	 																																																															"#8FDDF8",
+			  	 	   																																						"#1750AC")}
+			  	 	  else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+			  	 																  "#0B820B","#086208")}
+			  	 }
+			 else if (input$spin==3) {
+			  	 	if (input$colorblind==TRUE) {Gradi<-c("#9f1D34","#E7626A","#F1988F",
+			  	 																																							"#FCCCA5","#FCE2B6",
+			  	 																																							"#1750AC")}
+			  	 	else {Gradi<-c("#9F1D34","#E7626A","#F1988F","#FCCCA5","#FCE2B6",
+			  	 																"#086208")}
+			  	 }
 
   	 n<-7
   	 progress$inc(1/n, detail = paste("Reading in data: step", 1))
     filestring <- tolower(input$select)
-    tes_data <-  read.csv(paste0(filestring,"_tes.csv"))
+    tes_data_csv <-  read.csv(paste0(filestring,"_tes.csv"))
     tes_data_g <- st_read(paste0(filestring,"_tes.shp"))
-    tes_data <- cbind(tes_data, geometry = tes_data_g$geometry)
+    tes_data <- cbind(tes_data_csv, geometry = tes_data_g$geometry)
     row_count <- nrow(tes_data)
     boundary_factor <- (1/row_count)*100
     print(row_count)
-  
+    if (filestring=='tu') {
+    colnames(tes_data)[colnames(tes_data) == "TreeEquityScore"] ="tesctyscor"}
     tes_data <- tes_data[!is.na(tes_data$tesctyscor),]
     
     if (input$clustermap==TRUE) {
@@ -347,7 +330,7 @@ server <- function(input, output, session) {
         # Increment the progress bar, and update the detail text.
         progress$inc(1/n, detail = paste(
         	"Calculating Gi, indicating cluster strength, and local p's with a 
-        	#Monte Carlo simulation: step", 5))
+        	Monte Carlo simulation: step", 5))
         
         # Calculate the Gi using local_g_perm, as tes_hot_spots.
         #The Gi is the ratio of the spatial lag of a feature to the sum of the 
@@ -375,20 +358,22 @@ server <- function(input, output, session) {
                 # Add a new column called "classification"
                 classification = case_when(
                   # Classify based on the following criteria:
-                  gi > 0 & p_folded_sim <= 0.01 ~ "Very green",
-                  gi > 0 & p_folded_sim <= 0.05 ~ "Moderately green",
-                  gi > 0 & p_folded_sim <= 0.1 ~ "Somewhat green",
-                  gi < 0 & p_folded_sim <= 0.01 ~ "Very bare",
-                  gi < 0 & p_folded_sim <= 0.05 ~ "Moderately bare",
-                  gi < 0 & p_folded_sim <= 0.1 ~ "Somewhat bare",
+                  gi > 0 & p_folded_sim <= 0.01 ~ "Very equitable",
+                  gi > 0 & p_folded_sim <= 0.05 ~ "Moderately equitable",
+                  gi > 0 & p_folded_sim <= 0.1 ~ "Somewhat equitable",
+                  gi < 0 & p_folded_sim <= 0.01 ~ "Very inequitable",
+                  gi < 0 & p_folded_sim <= 0.05 ~ "Moderately inequitable",
+                  gi < 0 & p_folded_sim <= 0.1 ~ "Somewhat inequitable",
                   TRUE ~ "No cluster detected"
                 ),
                 # Convert 'classification' into a factor for easier plotting
                 classification = factor(
                   classification,
-                  levels = c("Very green", "Moderately green", "Somewhat green",
+                  levels = c("Very equitable", "Moderately equitable", 
+                  											"Somewhat equitable",
                              "No cluster detected",
-                             "Somewhat bare", "Moderately bare", "Very bare")
+                             "Somewhat inequitable", "Moderately inequitable", 
+                  											"Very inequitable")
                 )
               ) |> 
               # Visualize the results with ggplot2
@@ -414,8 +399,8 @@ server <- function(input, output, session) {
                 base_rect_size = base_size/20
               ) +
               labs(
-                fill = "Green Spot \n Classification",
-                title = paste("Tree Equity Green Spots in", 
+                fill = "Hot Spot \n Classification",
+                title = paste("Tree Equity Hot Spots in", 
                               states[which(state_lookup == input$select)],
                               "\n",p2))
             }
@@ -451,10 +436,17 @@ server <- function(input, output, session) {
   })
     output$hist <- renderPlot({
       filestring <- tolower(input$select)
-      tes_data <-  read.csv(paste0(filestring,"_tes.csv"))$tesctyscor
+      tes_data <-  read.csv(paste0(filestring,"_tes.csv"))
+      if (filestring=='tu') {
+         colnames(tes_data)[colnames(tes_data) =="TreeEquityScore"]="tesctyscor"
+         tes_data <- tes_data$tesctyscor
+         loc<-'Tucson'}
+      else
+         {tes_data <-  tes_data$tesctyscor
+         loc=input$select}
       hist(tes_data, main=paste0(
-        "Tree equity scores for ",input$select),
-        xlab=paste0("Tree Equity Score [range 0-100]"))
+      "Tree equity scores for ", loc),
+      xlab=paste0("Tree Equity Score [range 0-100]"))
     })
       
 
